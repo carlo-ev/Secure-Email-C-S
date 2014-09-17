@@ -1,5 +1,4 @@
-import json
-import os
+import json, string, random
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dbBase import Base, User, Message, Contact
@@ -44,10 +43,11 @@ class ApplicationHerald:
 		else:
 			if action == "login":
 				print "login"
-				if self.login( str(jsonMessage["login"]["email"]), str(jsonMessage["login"]["password"]) ):
-					sessionKey = os.urandom(64).encode('base-64')
-					self.onlineUsers.append( (str(jsonMessage["login"]["email"]) , sessionKey) )
-					resp = self.login_response( str(jsonMessage["login"]["email"]), sessionKey, "" )
+				prc_email = str(jsonMessage["login"]["email"])
+				if self.login( prc_email, str(jsonMessage["login"]["password"]) ):
+					sessionKey = self.create_session_key(prc_email)
+					self.onlineUsers.append( (prc_email , sessionKey) )
+					resp = self.login_response( prc_email, sessionKey, "" )
 				else:
 					resp = self.login_response( "", "", "Invalid Credentials" )
 			elif action == "signup":
@@ -110,6 +110,9 @@ class ApplicationHerald:
 			print "Login Failed!"
 			return False
 
+	def create_session_key(self, email):
+			return ''.join( random.choice( string.ascii_uppercase + email + string.digits + string.ascii_lowercase ) for _ in range(64) )
+		
 	def login_response(self, user, key, errors):
 		response = '{'
 		if errors == "":
