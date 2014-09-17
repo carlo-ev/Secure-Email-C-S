@@ -1,16 +1,14 @@
-import smtplib
-import email.utils
-from email.mime.text import MIMEText
+import socket
+import json
 
-msg = MIMEText('This is the body of the message.')
-msg['To'] = email.utils.formataddr(('Recipient', 'recipient@example.com'))
-msg['From'] = email.utils.formataddr(('Author', 'author@example.com'))
-msg['Subject'] = 'Simple Test Message'
+client = socket.socket()
+host = "127.0.0.1"
+port = 9999
 
-server = smtplib.SMTP('127.0.0.1', 1025)
-server.set_debuglevel(True)
-try:
-  server.sendmail('author@example.com', ['recipient@example.com'], msg.as_string())
-finally:
-  server.quit()
-
+client.connect((host, port))
+print client.recv(1024)
+messageToSend =  '{ "action": "login", "login":{"email":"user@user", "password":"password1"}}'
+client.send(messageToSend)
+print client.recv(1024)
+client.send("end")
+client.close()
