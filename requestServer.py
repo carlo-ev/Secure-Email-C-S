@@ -11,6 +11,7 @@ class Server:
 
 	
 	def run(self):
+		print "Server Running"
 		while True:
 			clientSocket, clientAddress = self.socket.accept()
 			print ('Cliente ', clientAddress,' Connected')

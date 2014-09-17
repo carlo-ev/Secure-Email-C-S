@@ -1,4 +1,5 @@
 import json
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dbBase import Base, User, Message, Contact
@@ -17,7 +18,7 @@ class ApplicationHerald:
 	def newRequest(self, message):
 		jsonMessage = json.loads(message)
 		print jsonMessage
-		user = self.get_user_from_message(jsonMesssage)
+		user = self.get_user_from_message(jsonMessage)
 		action = jsonMessage["action"]
 		if( user is not None ):
 			if(islogged(user)):
@@ -26,20 +27,27 @@ class ApplicationHerald:
 				elif action == "getContacts":
 					resp = self.getContacts(user[0])
 				elif action == "sendMail":
+					print "SendMail"
+					resp = "SendMail"
+				elif action == "addContact":
+					print "addContact"
+					resp = "addcontact"
 				elif action == "logout":
+					print "Logout"
+					resp = "Logout"
 				else:
 					print "Action not known"
-					resp = '{ success: false, errors: "Action not known" }'
+					resp = '{ "success": False, "errors": "Action not known" }'
 			else:
 				print "Invalid Credencials Sent"
-				resp = '{ success: false, errors: "Invalid Credentials"}'
+				resp = '{ "success": False, "errors": "Invalid Credentials"}'
 		else:
 			if action == "login":
 				print "login"
 				if self.login( str(jsonMessage["login"]["email"]), str(jsonMessage["login"]["password"]) ):
-					key = "RandomKey"
-					self.onlineUsers.append( (str(jsonMessage["login"]["email"]) , key) )
-					resp = self.login_response( (str(jsonMessage["login"]["email"]), key, "" )
+					sessionKey = os.urandom(64).encode('base-64')
+					self.onlineUsers.append( (str(jsonMessage["login"]["email"]) , sessionKey) )
+					resp = self.login_response( str(jsonMessage["login"]["email"]), sessionKey, "" )
 				else:
 					resp = self.login_response( "", "", "Invalid Credentials" )
 			elif action == "signup":
@@ -47,27 +55,26 @@ class ApplicationHerald:
 				resp = "signup" 
 			else:
 				print "Action not known"
-				resp = '{ success: False, errors: "Action not known" }'
+				resp = '{ "success": False, "errors": "Action not known" }'
 		return resp
 
 	def getContacts(self, user_email):
 		print "Gettin user contacts"
-		current_user self.session.query(User).filter( User.email==user_email ).all()
+		current_user = self.session.query(User).filter( User.email==user_email ).all()
 		contacts = current_user.contacts
 		print contacts
-		response = '{ successs: True, contacts: ['
+		response = '{ "successs": True, "contacts": ['
 		for cont in contacts:
 			response += cont.toJSON()
 			response += ', '
 		response += '{} ] }'
 		return response
-																		 ' 
-																		 
+										 
 	def getMail(self, user_email):
 		print "Gettin Mail for ", user_email
 		messages = self.session.query(Message).filter( Message.receiver.like(user_email) ).all()
 		print messages
-		response = '{ succcess: True, messages: ['
+		response = '{ "succcess": True, "messages": ['
 		for mess in messages:
 			response += mess.toJSON()
 			response += ', '
@@ -97,20 +104,22 @@ class ApplicationHerald:
 			print user_to_login
 			if len(user_to_login) > 0:
 				print "User Found!"
-				if users[0].password == password:
+				if user_to_login[0].password == password:
+					print "Login Successful"
 					return True
+			print "Login Failed!"
 			return False
 
 	def login_response(self, user, key, errors):
 		response = '{'
 		if errors == "":
-				response += 'user: { '
-				response += 'email: "' + user + '",'
-				response += 'key: "' + key + '" '
+				response += '"user": { '
+				response += '"email": "' + user + '", '
+				response += '"key": "' + key + '" '
 				response += '}, '
-				response += 'success: true'
+				response += '"success": "True"'
 		else:
 			response += 'errors: "' + errors + '", '
-			response += 'success: false'
+			response += 'success: "False"'
 		response += '}'
 		return response

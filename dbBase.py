@@ -19,7 +19,10 @@ class User(Base):
 	contacts = relationship("Contact")
 
 	def __repr__(self):
-		return "<User (id='%s', email='%s', password='%s', active='%s', message='%s', contacts='%s', created_at='%s')>" % (self.id, self.email, self.password, self.active, self.messages, self.contacts, self.created_at)
+		return "<User (id='%s', email='%s', password='%s', active='%s', messages='%s', contacts='%s', created_at='%s')>" % (self.id, self.email, self.password, self.active, self.messages, self.contacts, self.created_at)
+
+	def toJSON(self):
+		return '{ "id": "%s", "email": "%s", "password": "%s", "active": "%s", "created_at": "%s" }' % (self.id, self.email, self.password, self.active, self.created_at)
 
 class Message(Base):
 	__tablename__ = 'messages'
@@ -33,7 +36,10 @@ class Message(Base):
 	created_at = Column( String(26) )
 
 	def __repr__(self):
-		return "<Message (id='%s', title='%s', body='%s', from='%s', to='%s', active='%s', created_at='%s')>" % (self.id, self.title, self.body, self.sender, self.receiver, self.active, self.created_at)
+		return "<Message (id='%s', title='%s', body='%s', sender='%s', receiver='%s', active='%s', created_at='%s')>" % (self.id, self.title, self.body, self.sender, self.receiver, self.active, self.created_at)
+	
+	def toJSON(self):
+		return '{ "id": "%s", "title": "%s", "body": "%s", "sender": "%s", "receiver": "%s", "active": "%s", "created_at": "%s"}' % (self.id, self.title, self.body, self.sender, self.receiver, self.active, self.created_at)
 
 class Contact(Base):
 	__tablename__ = 'contacts'
@@ -46,6 +52,9 @@ class Contact(Base):
 
 	def __repr__(self):
 		return "<Contact (id='%s', user_id='%s', username='%s', active='%s', added_at='%s')>" % (self.id, self.user_id, self.username, self.active, self.added_at)
+
+	def toJSON(self):
+		return '{ "id": "%s", "user_id": "%s", "username": "%s", "active": "%s", "added_at": "%s"}' % (self.id, self.user_id, self.username, self.active, self.added_at)
 
 engine = create_engine('sqlite:///secureEmail.sqlite3')
 
