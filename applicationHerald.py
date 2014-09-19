@@ -103,7 +103,7 @@ class ApplicationHerald:
 		new_email = str(credentials["email"])
 		new_password = str(credentials["password"])
 		colliding_users = self.session.query(User).filter( User.email==new_email ).all()
-		if colliding_users > 0:
+		if len(colliding_users) > 0:
 			return '{ "success": "False", "errors": "Missing Credentials/User Already Exists"  }'
 		else:
 			date_time = str(datetime.now())

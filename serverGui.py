@@ -5,7 +5,7 @@ import thread
 class ServerGui(tk.Frame):
 
 	def __init__(self, master=None):
-		tk.Tk.__init__(self,master)
+		tk.Frame.__init__(self,master)
 		self.grid()
 		self.createWidgets()
 
