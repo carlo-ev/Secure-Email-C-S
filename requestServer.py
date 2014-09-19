@@ -1,20 +1,28 @@
 import socket
+import Tkinter as tk
 from applicationHerald import ApplicationHerald
 
 class Server:
 
-	def __init__(self, host, port, queue=999):
+	def puts(self, newText):
+		self.gui.config(state='normal')
+		self.gui.insert(tk.END,  str(newText) + '\n')
+		self.gui.config(state='disabled')
+
+	def __init__(self, host, port, gui, queue=999):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.bind((host, port))
 		self.socket.listen(queue)
-		self.herald = ApplicationHerald();		
+		self.gui = gui
+		self.herald = ApplicationHerald(gui);		
 
 	
 	def run(self):
-		print "Server Running"
+		self.puts("Server Running")
 		while True:
 			clientSocket, clientAddress = self.socket.accept()
-			print ('Cliente ', clientAddress,' Connected')
+			self.puts("New Connection Inbound...\n")
+			self.puts('Cliente '+str(clientAddress)+' Connected')
 			clientSocket.send("Email Server Online")
 			currentMessage = ""
 			currentMessage = clientSocket.recv(1024)
